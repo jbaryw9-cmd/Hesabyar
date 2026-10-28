@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>حساب‌یار | حسابداری خرده‌فروشی (نسخه اصلاح‌شده)</title>
+<style>
+:root{--green:#14532d;--green2:#166534;--bg:#f3f6f4;--card:#fff;--text:#17211b;--muted:#66736a;--line:#dce5de;--red:#b91c1c;--amber:#a16207;--blue:#1d4ed8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif;font-size:14px;line-height:1.7}
+header{background:linear-gradient(135deg,var(--green),#15803d);color:white;padding:18px 16px 14px;position:sticky;top:0;z-index:5;box-shadow:0 3px 14px #0001}
+header h1{margin:0;font-size:21px}header p{margin:2px 0 0;font-size:12px;opacity:.9}
+nav{display:flex;gap:7px;overflow:auto;padding:10px;background:#e6eee8;position:sticky;top:82px;z-index:4}
+nav button{white-space:nowrap;border:1px solid #c8d8cc;background:white;color:#23412d;border-radius:20px;padding:8px 12px;font:inherit;font-size:12px}
+nav button.active{background:var(--green);color:white;border-color:var(--green)}
+main{max-width:1000px;margin:auto;padding:14px;padding-bottom:45px}
+.page{display:none}.page.active{display:block}
+h2{font-size:18px;margin:5px 0 12px}h3{font-size:15px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;box-shadow:0 2px 5px #10201505}
+.stat small{color:var(--muted);display:block}.stat strong{font-size:19px;display:block;margin-top:3px;overflow-wrap:anywhere}
+.panel{margin:12px 0}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}.field.full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted)}
+input,select,textarea{width:100%;min-width:0;border:1px solid #cbd5ce;border-radius:9px;padding:10px;background:#fff;font:inherit;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:2px solid #86b99a;border-color:var(--green)}
+button{cursor:pointer;font:inherit}.btn{border:0;border-radius:9px;padding:10px 13px;background:var(--green);color:white}.btn.secondary{background:#e5eee7;color:var(--green)}.btn.danger{background:#fee2e2;color:#991b1b}.btn.small{padding:5px 8px;font-size:12px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.hint{color:var(--muted);font-size:12px;margin:6px 0}.warn{color:var(--amber)}.dangerText{color:var(--red)}.success{color:var(--green2)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white}
+table{width:100%;border-collapse:collapse;min-width:540px;font-size:12px}th,td{padding:9px 8px;border-bottom:1px solid #e7ece8;text-align:right;vertical-align:top}th{background:#f0f5f1;color:#425348;white-space:nowrap}tr:last-child td{border-bottom:0}
+.empty{text-align:center;color:var(--muted);padding:20px}
+.tag{display:inline-block;border-radius:20px;padding:2px 7px;font-size:11px;background:#e5eee7;color:#14532d}.tag.red{background:#fee2e2;color:#991b1b}
+.notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px;font-size:12px;color:#1e40af}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}main{padding-top:20px}.stat strong{font-size:22px}}
+@media(max-width:420px){main{padding:10px}.grid{gap:7px}.stat{padding:10px}.stat strong{font-size:16px}form{gap:8px}.panel{padding:11px}header{padding:14px}nav{top:76px}}
+
+/* تقویم شمسی داخلی */
+.jcal{position:relative}
+.jcal-pop{display:none;position:absolute;z-index:30;top:100%;right:0;width:min(320px,92vw);background:#fff;border:1px solid #cbd5ce;border-radius:12px;box-shadow:0 10px 28px #0002;padding:10px;margin-top:4px}
+.jcal-pop.open{display:block}
+.jcal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.jcal-head button,.jcal-grid button{border:1px solid #dce5de;background:#f8faf8;color:#17211b;border-radius:8px;padding:6px;min-height:34px}
+.jcal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+.jcal-grid .weekday{font-size:11px;color:#66736a;padding:4px 0}
+.jcal-grid button{padding:5px 0}
+.jcal-grid button.today{border-color:#166534;color:#166534;font-weight:bold}
+.jcal-grid button.selected{background:#14532d;color:#fff;border-color:#14532d}
+.jcal-actions{display:flex;justify-content:space-between;gap:6px;margin-top:8px}
+.jcal-actions button{border:0;border-radius:8px;padding:7px 10px;background:#e5eee7;color:#14532d}
+
+</style>
+</head>
+<body>
+<header><h1>حساب‌یار</h1><p>حسابداری و مدیریت خرده‌فروشی • آفلاین • ریال</p></header>
+<nav id="nav">
+<button data-page="home" class="active">داشبورد</button><button data-page="products">کالاها</button><button data-page="customers">مشتریان</button><button data-page="suppliers">تأمین‌کنندگان</button><button data-page="purchases">خرید کالا</button><button data-page="sales">فروش</button><button data-page="payments">دریافت‌ها</button><button data-page="cashbox">صندوق</button><button data-page="bankAccounts">حساب‌های بانکی</button><button data-page="checks">مدیریت چک‌ها</button><button data-page="expenses">هزینه‌ها</button><button data-page="reports">گزارش‌ها</button><button data-page="backup">پشتیبان</button>
+</nav>
+<main>
+<section id="home" class="page active">
+<h2>داشبورد امروز</h2>
+<div class="grid">
+<div class="stat"><small>فروش امروز</small><strong id="dashSales">۰ ریال</strong></div>
+<div class="stat"><small>دریافت امروز</small><strong id="dashReceipts">۰ ریال</strong></div>
+<div class="stat"><small>هزینه امروز</small><strong id="dashExpenses">۰ ریال</strong></div>
+<div class="stat"><small>ارزش تقریبی موجودی</small><strong id="dashStock">۰ ریال</strong></div>
+<div class="stat"><small>بدهی مشتریان</small><strong id="dashDebt">۰ ریال</strong></div>
+<div class="stat"><small>تعداد کالاها</small><strong id="dashProducts">۰</strong></div>
+<div class="stat"><small>سود ناخالص امروز</small><strong id="dashProfit">۰ ریال</strong></div>
+<div class="stat"><small>هشدار موجودی کم</small><strong id="dashLow">۰</strong></div>
+<div class="stat"><small>موجودی فعلی صندوق</small><strong id="dashCashbox">۰ ریال</strong></div>
+<div class="stat"><small>چک‌های سررسید امروز</small><strong id="dashChecksToday">۰ مورد</strong><small id="dashChecksDetail">مجموع: ۰ ریال</small></div>
+</div>
+<div class="panel"><h3>شروع سریع</h3><div class="actions"><button class="btn" onclick="showPage('sales')">ثبت فروش</button><button class="btn secondary" onclick="showPage('products')">افزودن کالا</button><button class="btn secondary" onclick="showPage('customers')">افزودن مشتری</button><button class="btn secondary" onclick="showPage('backup')">پشتیبان‌گیری</button></div><p class="hint">برای شروع، کالاها و موجودی اولیه را ثبت کنید. سپس فروش و دریافت‌های مشتریان را وارد کنید.</p></div>
+<div class="panel"><h3>آخرین فروش‌ها</h3><div id="recentSales"></div></div>
+</section>
+
+<section id="products" class="page">
+<h2>مدیریت کالاها</h2>
+<div class="panel"><h3 id="productFormTitle">افزودن کالای جدید</h3>
+<form id="productForm">
+<input type="hidden" id="productId">
+<div class="field"><label>کد کالا *</label><input id="pCode" required placeholder="مثلاً 1001"></div>
+<div class="field"><label>نام کالا *</label><input id="pName" required placeholder="نام کالا"></div>
+<div class="field"><label>دسته‌بندی</label><input id="pCategory" placeholder="مثلاً خوراکی"></div>
+<div class="field"><label>واحد</label><select id="pUnit"><option>عدد</option><option>بسته</option><option>کیلوگرم</option><option>گرم</option><option>لیتر</option><option>متر</option><option>جفت</option><option>کارتن</option></select></div>
+<div class="field"><label>قیمت خرید هر واحد (ریال) *</label><input id="pCost" type="number" min="0" step="1" required value="0"></div>
+<div class="field"><label>قیمت فروش هر واحد (ریال) *</label><input id="pPrice" type="number" min="0" step="1" required value="0"></div>
+<div class="field"><label>موجودی اولیه *</label><input id="pStock" type="number" min="0" step="0.001" required value="0"></div>
+<div class="field"><label>حد هشدار موجودی</label><input id="pMin" type="number" min="0" step="0.001" value="2"></div>
+<div class="field full"><label>توضیحات</label><input id="pNote" placeholder="اختیاری"></div>
+<div class="field full"><div class="actions"><button class="btn" type="submit">ذخیره کالا</button><button class="btn secondary" type="button" onclick="resetProductForm()">پاک کردن فرم</button></div></div>
+</form><p class="hint">موجودی اولیه فقط هنگام ساخت کالا اعمال می‌شود. تغییر موجودی پس از آن باید از طریق خرید یا اصلاح موجودی انجام شود.</p></div>
+<div class="panel"><h3>فهرست کالاها</h3><div class="field"><label>جستجو</label><input id="productSearch" placeholder="جستجوی نام یا کد کالا" oninput="renderProducts()"></div><div id="productsTable" class="tablewrap" style="margin-top:10px"></div></div>
+</section>
+
+<section id="customers" class="page">
+<h2>مشتریان</h2>
+<div class="panel"><h3 id="customerFormTitle">افزودن مشتری</h3><form id="customerForm">
+<input type="hidden" id="customerId">
+<div class="field"><label>نام مشتری *</label><input id="cName" required></div><div class="field"><label>شماره تماس</label><input id="cPhone" inputmode="tel"></div>
+<div class="field"><label>مانده اول دوره (ریال)</label><input id="cOpening" type="number" min="0" step="1" value="0"></div><div class="field"><label>توضیحات</label><input id="cNote"></div>
+<div class="field full"><div class="actions"><button class="btn" type="submit">ذخیره مشتری</button><button class="btn secondary" type="button" onclick="resetCustomerForm()">پاک کردن فرم</button></div></div>
+</form><p class="hint">مانده اول دوره به‌عنوان بدهی اولیه مشتری ثبت می‌شود؛ آن را دوباره در فروش وارد نکنید.</p></div>
+<div class="panel"><h3>فهرست مشتریان و مانده حساب</h3><div id="customersTable" class="tablewrap"></div></div>
+<div class="panel"><h3>گردش حساب مشتری</h3><div class="field"><label>انتخاب مشتری</label><select id="ledgerCustomer" onchange="renderLedger()"></select></div><div id="customerLedger" style="margin-top:10px"></div></div>
+</section>
+
+<section id="suppliers" class="page">
+<h2>مدیریت تأمین‌کنندگان</h2>
+<div class="panel"><h3 id="supplierFormTitle">افزودن تأمین‌کننده</h3><form id="supplierForm">
+<input type="hidden" id="supplierId">
+<div class="field"><label>نام تأمین‌کننده *</label><input id="supplierName" required></div>
+<div class="field"><label>شماره تماس</label><input id="supplierPhone" inputmode="tel"></div>
+<div class="field"><label>مانده بدهی اول دوره به تأمین‌کننده (ریال)</label><input id="supplierOpening" type="number" min="0" step="1" value="0"></div>
+<div class="field full"><label>توضیحات</label><input id="supplierNote"></div>
+<div class="field full"><div class="actions"><button class="btn" type="submit">ذخیره تأمین‌کننده</button><button class="btn secondary" type="button" onclick="resetSupplierForm()">پاک کردن فرم</button></div></div>
+</form><p class="hint">مانده بدهی، مانده اول دوره به‌علاوه خریدهای پرداخت‌نشده ثبت‌شده از این تأمین‌کننده است. پرداخت‌های بعدی به تأمین‌کننده هنوز به‌صورت جداگانه ثبت نمی‌شوند.</p></div>
+<div class="panel"><h3>فهرست تأمین‌کنندگان</h3><div id="suppliersTable" class="tablewrap"></div></div>
+</section>
+
+<section id="purchases" class="page">
+<h2>خرید کالا و افزایش موجودی</h2>
+<div class="panel"><form id="purchaseForm">
+<div class="field full"><label>کالا *</label><select id="buyProduct" required></select></div>
+<div class="field full"><label>تأمین‌کننده</label><select id="buySupplier"><option value="">بدون انتخاب تأمین‌کننده</option></select></div>
+<div class="field"><label>تعداد خرید *</label><input id="buyQty" type="number" min="0.001" step="0.001" required value="1"></div>
+<div class="field"><label>قیمت خرید هر واحد (ریال) *</label><input id="buyCost" type="number" min="0" step="1" required value="0"></div>
+<div class="field"><label>تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="buyDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('buyDate')">📅</button></div><div class="jcal-pop" id="cal-buyDate"></div></div></div><div class="field"><label>پرداخت بابت خرید</label><select id="buyPaid"><option value="yes">پرداخت شده</option><option value="no">پرداخت نشده / نسیه</option></select></div>
+<div class="field full"><label>توضیحات</label><input id="buyNote"></div><div class="field full"><button class="btn" type="submit">ثبت خرید و افزایش موجودی</button></div>
+</form><p class="hint">ثبت خرید، موجودی را افزایش می‌دهد و بهای تمام‌شده کالا را به‌روز می‌کند. انتخاب تأمین‌کننده در سوابق خرید ذخیره می‌شود؛ خریدهای پرداخت‌نشده در مانده بدهی همان تأمین‌کننده لحاظ می‌شوند.</p></div>
+<div class="panel"><h3>سوابق خرید</h3><div id="purchasesTable" class="tablewrap"></div></div>
+</section>
+
+<section id="sales" class="page">
+<h2>ثبت فروش</h2>
+<div class="panel"><form id="saleForm">
+<div class="field full"><label>کالا *</label><select id="saleProduct" required></select><div class="hint" id="saleStockHint"></div></div>
+<div class="field"><label>تعداد *</label><input id="saleQty" type="number" min="0.001" step="0.001" required value="1"></div><div class="field"><label>قیمت فروش هر واحد (ریال) *</label><input id="salePrice" type="number" min="0" step="1" required value="0"></div>
+<div class="field"><label>نوع فروش</label><select id="saleType"><option value="cash">نقدی</option><option value="credit">نسیه / بخشی نسیه</option></select></div>
+<div class="field"><label>مشتری (برای نسیه الزامی)</label><select id="saleCustomer"></select></div>
+<div class="field"><label>مبلغ دریافتی همین فروش (ریال)</label><input id="saleReceived" type="number" min="0" step="1" value="0"></div><div class="field"><label>روش دریافت مبلغ</label><select id="saleReceivedMethod"><option>نقدی</option><option>کارت‌خوان</option><option>کارت به کارت</option><option>حواله</option><option>سایر</option></select></div><div class="field"><label>تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="saleDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('saleDate')">📅</button></div><div class="jcal-pop" id="cal-saleDate"></div></div></div>
+<div class="field full"><label>توضیحات</label><input id="saleNote"></div>
+<div class="field full"><div class="notice" id="salePreview">جمع فاکتور: ۰ ریال • مانده: ۰ ریال</div></div>
+<div class="field full"><button class="btn" type="submit">ثبت فروش و صدور فاکتور</button></div>
+</form></div>
+<div class="panel"><h3>فاکتورهای فروش</h3><div class="field"><label>جستجو در فاکتورها</label><input id="saleSearch" placeholder="شماره فاکتور یا مشتری" oninput="renderSales()"></div><div id="salesTable" class="tablewrap" style="margin-top:10px"></div></div>
+</section>
+
+<section id="payments" class="page">
+<h2>ثبت دریافت از مشتری</h2>
+<div class="panel"><form id="paymentForm">
+<div class="field full"><label>مشتری *</label><select id="payCustomer" required></select></div>
+<div class="field"><label>مبلغ دریافتی (ریال) *</label><input id="payAmount" type="number" min="1" step="1" required></div><div class="field"><label>تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="payDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('payDate')">📅</button></div><div class="jcal-pop" id="cal-payDate"></div></div></div>
+<div class="field full"><label>روش دریافت</label><select id="payMethod"><option>نقدی</option><option>کارت‌خوان</option><option>کارت به کارت</option><option>حواله</option><option>سایر</option></select></div>
+<div class="field full"><label>توضیحات</label><input id="payNote"></div><div class="field full"><button class="btn" type="submit">ثبت دریافت</button></div>
+</form></div>
+<div class="panel"><h3>سوابق دریافت</h3><div id="paymentsTable" class="tablewrap"></div></div>
+</section>
+
+<section id="cashbox" class="page">
+<h2>صندوق نقدی</h2>
+<div id="cashSummary" class="grid"></div>
+<div class="panel"><h3>موجودی اول دوره صندوق</h3><form id="cashOpeningForm"><div class="field"><label>موجودی اولیه صندوق (ریال)</label><input id="cashOpening" type="number" min="0" step="1" required value="0"></div><div class="field full"><button class="btn" type="submit">ذخیره موجودی اولیه</button></div></form><p class="hint">موجودی صندوق به‌صورت خودکار با دریافت‌های نقدی فروش و دریافت نقدی از مشتریان افزایش و با هزینه‌هایی که روش پرداخت آن‌ها «نقدی» است کاهش پیدا می‌کند.</p></div>
+<div class="panel"><h3>گردش صندوق</h3><div id="cashMovements"></div></div>
+</section>
+
+<section id="bankAccounts" class="page">
+<h2>حساب‌های بانکی</h2>
+<div class="panel"><h3>افزودن حساب بانکی</h3>
+<form id="bankAccountForm">
+<div class="field"><label for="bankTitle">عنوان حساب *</label><input id="bankTitle" required placeholder="مثلاً حساب اصلی مغازه"></div>
+<div class="field"><label for="bankName">نام بانک *</label><input id="bankName" required placeholder="مثلاً بانک ملی"></div>
+<div class="field"><label for="bankNumber">شماره حساب یا شبا (اختیاری)</label><input id="bankNumber" inputmode="text" placeholder="شماره حساب یا شبا"></div>
+<div class="field"><label for="bankCard">چهار رقم آخر کارت (اختیاری)</label><input id="bankCard" inputmode="numeric" maxlength="4" placeholder="مثلاً ۱۲۳۴"></div>
+<div class="field"><label for="bankOpening">موجودی اول دوره (ریال)</label><input id="bankOpening" type="number" step="1" value="0" min="0"></div>
+<div class="field"><label for="bankNote">توضیحات (اختیاری)</label><input id="bankNote" placeholder="توضیحات"></div>
+<div class="field full"><button class="btn" type="submit">ثبت حساب بانکی</button></div>
+</form>
+<p class="hint">در این مرحله اطلاعات حساب‌ها و موجودی اول دوره ثبت می‌شود. ثبت تراکنش و محاسبه مانده بر اساس واریزها و برداشت‌ها هنوز به این بخش متصل نیست.</p>
+</div>
+<div class="panel"><h3>فهرست حساب‌های بانکی</h3><div id="bankAccountsTable" class="tablewrap"></div></div>
+</section>
+
+
+<section id="checks" class="page">
+<h2>مدیریت گردش چک‌ها</h2>
+<div class="panel"><h3>ثبت چک جدید</h3>
+<form id="checkForm">
+<div class="field"><label>نوع چک *</label><select id="checkType" required><option value="incoming">چک دریافتی از مشتری</option><option value="outgoing">چک پرداختی به دیگران</option></select></div>
+<div class="field"><label>شماره چک *</label><input id="checkNumber" required placeholder="شماره چک"></div>
+<div class="field"><label>مبلغ (ریال) *</label><input id="checkAmount" type="number" min="1" step="1" required></div>
+<div class="field"><label>نام صادرکننده / دریافت‌کننده *</label><input id="checkPerson" required placeholder="نام شخص یا شرکت"></div>
+<div class="field"><label>بانک *</label><input id="checkBank" required placeholder="نام بانک"></div>
+<div class="field"><label>حساب بانکی مرتبط</label><select id="checkAccount"><option value="">بدون انتخاب</option></select></div>
+<div class="field"><label>تاریخ ثبت *</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="checkDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۰۴" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" onclick="openJalaliCalendar('checkDate')">📅</button></div><div class="jcal-pop" id="cal-checkDate"></div></div></div>
+<div class="field"><label>تاریخ سررسید *</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="checkDueDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۲۰" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" onclick="openJalaliCalendar('checkDueDate')">📅</button></div><div class="jcal-pop" id="cal-checkDueDate"></div></div></div>
+<div class="field"><label>وضعیت *</label><select id="checkStatus" required><option value="pending">در انتظار وصول / پرداخت</option><option value="deposited">واگذار شده به بانک</option><option value="cleared">وصول / پرداخت شد</option><option value="returned">برگشت خورده</option><option value="cancelled">باطل شده</option></select></div>
+<div class="field full"><label>توضیحات</label><input id="checkNote" placeholder="توضیحات اختیاری"></div>
+<div class="field full"><button class="btn" type="submit">ثبت چک</button></div>
+</form><p class="hint">این بخش برای پیگیری چک‌هاست و به‌صورت خودکار موجودی حساب بانکی یا مانده مشتری را تغییر نمی‌دهد.</p></div>
+<div class="panel"><h3>جست‌وجو و فیلتر چک‌ها</h3><div class="grid"><div class="field"><label>جست‌وجو</label><input id="checkSearch" placeholder="شماره چک، نام شخص یا بانک" oninput="renderChecks()"></div><div class="field"><label>نوع چک</label><select id="checkFilterType" onchange="renderChecks()"><option value="all">همه</option><option value="incoming">دریافتی</option><option value="outgoing">پرداختی</option></select></div><div class="field"><label>وضعیت</label><select id="checkFilterStatus" onchange="renderChecks()"><option value="all">همه وضعیت‌ها</option><option value="pending">در انتظار وصول / پرداخت</option><option value="deposited">واگذار شده به بانک</option><option value="cleared">وصول / پرداخت شد</option><option value="returned">برگشت خورده</option><option value="cancelled">باطل شده</option></select></div></div></div>
+<div class="panel"><h3>خلاصه چک‌ها</h3><div id="checksSummary" class="grid"></div></div>
+<div class="panel"><h3>فهرست چک‌ها</h3><div id="checksTable" class="tablewrap"></div></div>
+</section>
+
+<section id="expenses" class="page">
+<h2>ثبت هزینه‌ها</h2>
+<div class="panel"><form id="expenseForm">
+<div class="field"><label>عنوان هزینه *</label><input id="eTitle" required placeholder="مثلاً اجاره"></div><div class="field"><label>مبلغ (ریال) *</label><input id="eAmount" type="number" min="1" step="1" required></div>
+<div class="field"><label>دسته هزینه</label><select id="eCategory"><option>اجاره</option><option>حقوق</option><option>آب و برق و گاز</option><option>حمل‌ونقل</option><option>بسته‌بندی</option><option>تعمیرات</option><option>مالیات و عوارض</option><option>سایر</option></select></div><div class="field"><label>روش پرداخت هزینه</label><select id="eMethod"><option>نقدی</option><option>کارت‌خوان</option><option>کارت به کارت</option><option>حواله</option><option>سایر</option></select></div><div class="field"><label>تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="eDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('eDate')">📅</button></div><div class="jcal-pop" id="cal-eDate"></div></div></div>
+<div class="field full"><label>توضیحات</label><input id="eNote"></div><div class="field full"><button class="btn" type="submit">ثبت هزینه</button></div>
+</form></div><div class="panel"><h3>فهرست هزینه‌ها</h3><div id="expensesTable" class="tablewrap"></div></div>
+</section>
+
+<section id="reports" class="page">
+<h2>گزارش‌ها</h2>
+<div class="panel"><h3>بازه گزارش</h3><div class="grid"><div class="field"><label>از تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="reportFrom" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('reportFrom')">📅</button></div><div class="jcal-pop" id="cal-reportFrom"></div></div></div><div class="field"><label>تا تاریخ</label><div class="jcal"><div style="display:flex;gap:5px;align-items:center"><input id="reportTo" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۷/۲۹" required style="flex:1" autocomplete="off"><button type="button" class="btn secondary" aria-label="انتخاب تاریخ شمسی" onclick="openJalaliCalendar('reportTo')">📅</button></div><div class="jcal-pop" id="cal-reportTo"></div></div></div></div><p class="hint">تاریخ‌ها را به شمسی وارد کنید؛ نمونه: ۱۴۰۵/۰۷/۲۹</p><div class="actions"><button class="btn" onclick="renderReports()">نمایش گزارش</button><button class="btn secondary" onclick="setReportMonth()">ماه جاری</button></div></div>
+<div id="reportStats" class="grid"></div>
+<div class="panel"><h3>گردش انبار</h3><div id="stockReport" class="tablewrap"></div></div>
+<div class="panel"><h3>سود و زیان بر اساس فروش ثبت‌شده</h3><div id="profitReport"></div><p class="hint">سود ناخالص = فروش − بهای تمام‌شده کالای فروخته‌شده. سود عملیاتی تقریبی = سود ناخالص − هزینه‌های ثبت‌شده. مالیات، استهلاک، ضایعات و تعدیلات ثبت‌نشده محاسبه نمی‌شوند.</p></div>
+</section>
+
+<section id="backup" class="page">
+<h2>پشتیبان‌گیری و تنظیمات</h2>
+<div class="panel"><h3>پشتیبان‌گیری</h3><p>یک فایل پشتیبان از کالاها، مشتریان، فروش‌ها، خریدها، دریافت‌ها و هزینه‌ها ذخیره کنید. فایل را در محل امنی مثل پوشه Downloads یا فضای ابری نگه دارید.</p><div class="actions"><button class="btn" onclick="exportBackup()">دانلود نسخه پشتیبان</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">بازیابی از فایل</button><input id="importFile" type="file" accept=".json,application/json" hidden></div><p class="hint warn">بازیابی، اطلاعات فعلی برنامه را با اطلاعات داخل فایل جایگزین می‌کند. قبل از بازیابی از اطلاعات فعلی پشتیبان بگیرید.</p></div>
+<div class="panel"><h3>وضعیت اطلاعات</h3><div id="dataInfo"></div><p class="hint">اطلاعات در حافظه محلی مرورگر همین دستگاه ذخیره می‌شود. پاک‌کردن داده‌های مرورگر، حالت ناشناس، تغییر مرورگر یا تغییر آدرس سایت ممکن است دسترسی به اطلاعات را از بین ببرد. برای حفاظت بهتر، مرتب پشتیبان بگیرید.</p></div>
+<div class="panel"><h3>حذف همه اطلاعات</h3><p class="dangerText">این کار برگشت‌پذیر نیست مگر اینکه نسخه پشتیبان داشته باشید.</p><button class="btn danger" onclick="clearAllData()">حذف همه اطلاعات برنامه</button></div>
+</section>
+</main>
+<script>
+const KEY='hesabyar_retail_v1';
+
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+// تاریخ‌ها در پایگاه داده به میلادی ذخیره می‌شوند، اما در فرم‌ها شمسی نمایش داده می‌شوند.
+function div(a,b){return Math.floor(a/b)} function mod(a,b){return a-Math.floor(a/b)*b}
+function g2d(gy,gm,gd){let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;return d}
+function d2g(j){const d=new Date((j-2440588)*86400000);return [d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()]}
+function j2d(jy,jm,jd){let r=jy-(jy>=0?474:473),jy2=474+mod(r,2820);return jd+(jm<=7?(jm-1)*31:(jm-1)*30+6)+div(jy2*682-110,2816)+(jy2-1)*365+div(r,2820)*1029983+1948320}
+function d2j(jdn){let depoch=jdn-j2d(475,1,1),cycle=div(depoch,1029983),cyear=mod(depoch,1029983),ycycle;if(cyear===1029982)ycycle=2820;else{let aux1=div(cyear,366),aux2=mod(cyear,366);ycycle=div(2134*aux1+2816*aux2+2815,1028522)+aux1+1}let jy=ycycle+2820*cycle+474;if(jy<=0)jy--;let yday=jdn-j2d(jy,1,1)+1,jm=yday<=186?Math.ceil(yday/31):Math.ceil((yday-6)/30),jd=jdn-j2d(jy,jm,1)+1;return [jy,jm,jd]}
+function gregorianToJalali(iso){if(!iso)return '';let a=iso.split('-').map(Number);if(a.length!==3||!a.every(Number.isFinite))return iso;let j=d2j(g2d(a[0],a[1],a[2]));return j[0]+'/'+String(j[1]).padStart(2,'0')+'/'+String(j[2]).padStart(2,'0')}
+function digitsLatin(s){return String(s||'').replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))}
+function jalaliToGregorian(value){let s=digitsLatin(value).trim().replace(/[.\-\s]+/g,'/').replace(/\/+/g,'/').replace(/^\/|\/$/g,'');if(!s)return '';let a=s.split('/').map(Number);if(a.length!==3||a.some(x=>!Number.isFinite(x)))return '';let [jy,jm,jd]=a;if(jy<1200||jy>1600||jm<1||jm>12||jd<1||jd>(jm<=6?31:jm<=11?30:30))return '';let g=d2g(j2d(jy,jm,jd)),iso=g[0]+'-'+String(g[1]).padStart(2,'0')+'-'+String(g[2]).padStart(2,'0'),check=gregorianToJalali(iso).split('/').map(Number);return check[0]===jy&&check[1]===jm&&check[2]===jd?iso:''}
+function dateVal(s){return jalaliToGregorian(s)}
+
+const fresh=()=>({products:[],customers:[],suppliers:[],sales:[],purchases:[],payments:[],expenses:[],bankAccounts:[],checks:[],cashOpening:0,seq:{sale:1}});
+let db=load();
+function load(){
+ try{
+  const loaded=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'));
+  ['sales','purchases','payments','expenses','checks'].forEach(group=>{
+   loaded[group]=(Array.isArray(loaded[group])?loaded[group]:[]).map(item=>{
+    if(item && typeof item.date==='string' && !/^\d{4}-\d{2}-\d{2}$/.test(item.date)){
+     const converted=jalaliToGregorian(item.date);
+     if(converted)item.date=converted;
+    }
+    return item;
+   });
+  });
+  return loaded;
+ }catch(e){return fresh()}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function fa(n){return Number(n||0).toLocaleString('fa-IR',{useGrouping:true,maximumFractionDigits:3})}
+function money(n){return fa(Math.round(Number(n||0)))+' ریال'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function sum(a,fn){return a.reduce((t,x)=>t+fn(x),0)}
+function customerName(cid){return db.customers.find(c=>c.id===cid)?.name||'مشتری حذف‌شده'}
+function productName(pid){return db.products.find(p=>p.id===pid)?.name||'کالای حذف‌شده'}
+function customerBalance(cid){let c=db.customers.find(x=>x.id===cid);if(!c)return 0;return Number(c.opening||0)+sum(db.sales.filter(s=>s.customerId===cid),s=>s.total)-sum(db.sales.filter(s=>s.customerId===cid),s=>s.received)-sum(db.payments.filter(p=>p.customerId===cid),p=>p.amount)}
+function stockOf(pid){let p=db.products.find(x=>x.id===pid);if(!p)return 0;return Number(p.stock||0)+sum(db.purchases.filter(x=>x.productId===pid),x=>x.qty)-sum(db.sales.filter(x=>x.productId===pid),x=>x.qty)}
+function showPage(page){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='reports')renderReports();window.scrollTo(0,0)}
+document.getElementById('nav').addEventListener('click',e=>{let b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page)});
+function table(headers,rows){if(!rows.length)return '<div class="empty">هنوز موردی ثبت نشده است.</div>';return '<div class="tablewrap"><table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>'}
+function row(cells){return '<tr>'+cells.map(c=>'<td>'+c+'</td>').join('')+'</tr>'}
+function fillSelect(el,items,placeholder){let old=el.value;el.innerHTML=(placeholder!==null?'<option value="">'+esc(placeholder||'انتخاب کنید')+'</option>':'')+items.map(x=>'<option value="'+esc(x.value)+'">'+esc(x.label)+'</option>').join('');if(items.some(x=>x.value===old))el.value=old}
+function renderSelects(){
+ fillSelect(document.getElementById('saleProduct'),db.products.map(p=>({value:p.id,label:p.code+' - '+p.name+' (موجودی: '+fa(stockOf(p.id))+')'})),'انتخاب کالا');
+ fillSelect(document.getElementById('buyProduct'),db.products.map(p=>({value:p.id,label:p.code+' - '+p.name+' (موجودی: '+fa(stockOf(p.id))+')'})),'انتخاب کالا');
+ fillSelect(document.getElementById('buySupplier'),(db.suppliers||[]).map(x=>({value:x.id,label:x.name})),'بدون انتخاب تأمین‌کننده');
+ let cs=db.customers.map(c=>({value:c.id,label:c.name+' — مانده '+money(customerBalance(c.id))}));
+ fillSelect(document.getElementById('saleCustomer'),cs,'مشتری را انتخاب کنید');
+ fillSelect(document.getElementById('payCustomer'),cs,'انتخاب مشتری');
+ fillSelect(document.getElementById('ledgerCustomer'),db.customers.map(c=>({value:c.id,label:c.name})),'انتخاب مشتری');
+}
+function renderProducts(){let q=(document.getElementById('productSearch').value||'').trim().toLowerCase();let list=db.products.filter(p=>(p.name+' '+p.code+' '+p.category).toLowerCase().includes(q));document.getElementById('productsTable').innerHTML=table(['کد','نام کالا','دسته','موجودی','خرید','فروش','وضعیت','عملیات'],list.map(p=>row([esc(p.code),esc(p.name),esc(p.category||'—'),fa(stockOf(p.id))+' '+esc(p.unit),money(p.cost),money(p.price),stockOf(p.id)<=Number(p.min||0)?'<span class="tag red">موجودی کم</span>':'<span class="tag">موجود</span>','<button class="btn secondary small" onclick="editProduct(\''+p.id+'\')">ویرایش</button> <button class="btn danger small" onclick="deleteProduct(\''+p.id+'\')">حذف</button>'])));renderSelects()}
+function resetProductForm(){document.getElementById('productForm').reset();document.getElementById('productId').value='';document.getElementById('pCost').value=0;document.getElementById('pPrice').value=0;document.getElementById('pStock').value=0;document.getElementById('pMin').value=2;document.getElementById('productFormTitle').textContent='افزودن کالای جدید'}
+function editProduct(pid){let p=db.products.find(x=>x.id===pid);if(!p)return;document.getElementById('productId').value=p.id;document.getElementById('pCode').value=p.code;document.getElementById('pName').value=p.name;document.getElementById('pCategory').value=p.category||'';document.getElementById('pUnit').value=p.unit||'عدد';document.getElementById('pCost').value=p.cost;document.getElementById('pPrice').value=p.price;document.getElementById('pStock').value=p.stock;document.getElementById('pMin').value=p.min||0;document.getElementById('pNote').value=p.note||'';document.getElementById('productFormTitle').textContent='ویرایش کالا';window.scrollTo(0,0)}
+function deleteProduct(pid){if(db.sales.some(x=>x.productId===pid)||db.purchases.some(x=>x.productId===pid)){alert('این کالا سابقه خرید یا فروش دارد؛ برای حفظ سوابق امکان حذف آن نیست.');return}if(confirm('این کالا حذف شود؟')){db.products=db.products.filter(x=>x.id!==pid);save()}}
+document.getElementById('productForm').addEventListener('submit',e=>{e.preventDefault();let pid=document.getElementById('productId').value,code=document.getElementById('pCode').value.trim();if(db.products.some(p=>p.code.toLowerCase()===code.toLowerCase()&&p.id!==pid)){alert('این کد کالا قبلاً ثبت شده است.');return}let old=db.products.find(p=>p.id===pid);let p={id:pid||id(),code,name:document.getElementById('pName').value.trim(),category:document.getElementById('pCategory').value.trim(),unit:document.getElementById('pUnit').value,cost:+document.getElementById('pCost').value,price:+document.getElementById('pPrice').value,stock:old?old.stock:+document.getElementById('pStock').value,min:+document.getElementById('pMin').value,note:document.getElementById('pNote').value.trim()};if(old)db.products=db.products.map(x=>x.id===pid?p:x);else db.products.push(p);resetProductForm();save();alert('کالا ذخیره شد.')});
+function renderCustomers(){document.getElementById('customersTable').innerHTML=table(['مشتری','تماس','مانده حساب','عملیات'],db.customers.map(c=>row([esc(c.name),esc(c.phone||'—'),'<b class="'+(customerBalance(c.id)>0?'dangerText':'success')+'">'+money(customerBalance(c.id))+'</b>','<button class="btn secondary small" onclick="editCustomer(\''+c.id+'\')">ویرایش</button> <button class="btn danger small" onclick="deleteCustomer(\''+c.id+'\')">حذف</button>'])));renderSelects();renderLedger()}
+function resetCustomerForm(){document.getElementById('customerForm').reset();document.getElementById('customerId').value='';document.getElementById('cOpening').value=0;document.getElementById('customerFormTitle').textContent='افزودن مشتری'}
+function editCustomer(cid){let c=db.customers.find(x=>x.id===cid);if(!c)return;document.getElementById('customerId').value=c.id;document.getElementById('cName').value=c.name;document.getElementById('cPhone').value=c.phone||'';document.getElementById('cOpening').value=c.opening||0;document.getElementById('cNote').value=c.note||'';document.getElementById('customerFormTitle').textContent='ویرایش مشتری';window.scrollTo(0,0)}
+function deleteCustomer(cid){if(db.sales.some(x=>x.customerId===cid)||db.payments.some(x=>x.customerId===cid)){alert('این مشتری سابقه مالی دارد؛ برای حفظ سوابق امکان حذف او نیست.');return}if(confirm('مشتری حذف شود؟')){db.customers=db.customers.filter(x=>x.id!==cid);save()}}
+document.getElementById('customerForm').addEventListener('submit',e=>{e.preventDefault();let cid=document.getElementById('customerId').value,old=db.customers.find(c=>c.id===cid);let c={id:cid||id(),name:document.getElementById('cName').value.trim(),phone:document.getElementById('cPhone').value.trim(),opening:old?old.opening:+document.getElementById('cOpening').value,note:document.getElementById('cNote').value.trim()};if(old)db.customers=db.customers.map(x=>x.id===cid?c:x);else db.customers.push(c);resetCustomerForm();save();alert('مشتری ذخیره شد.')});
+function renderLedger(){let cid=document.getElementById('ledgerCustomer').value,c=db.customers.find(x=>x.id===cid);if(!c){document.getElementById('customerLedger').innerHTML='<div class="empty">یک مشتری انتخاب کنید.</div>';return}let entries=[];if(+c.opening)entries.push({date:'—',label:'مانده اول دوره',debit:+c.opening,credit:0});db.sales.filter(s=>s.customerId===cid).forEach(s=>entries.push({date:s.date,label:'فروش '+s.invoice,debit:s.total,credit:s.received}));db.payments.filter(p=>p.customerId===cid).forEach(p=>entries.push({date:p.date,label:'دریافت '+(p.method||''),debit:0,credit:p.amount}));entries.sort((a,b)=>a.date.localeCompare(b.date));let bal=0,rows=entries.map(x=>{bal+=x.debit-x.credit;return row([esc(x.date),esc(x.label),money(x.debit),money(x.credit),money(bal)])});document.getElementById('customerLedger').innerHTML='<p><b>مانده فعلی: '+money(customerBalance(cid))+'</b></p>'+table(['تاریخ','شرح','بدهکار','بستانکار','مانده'],rows)}
+function updateSalePreview(){let qty=+document.getElementById('saleQty').value||0,price=+document.getElementById('salePrice').value||0;if(document.getElementById('saleType').value==='cash')document.getElementById('saleReceived').value=Math.round(qty*price);let received=+document.getElementById('saleReceived').value||0,total=qty*price;document.getElementById('salePreview').textContent='جمع فاکتور: '+money(total)+' • دریافتی: '+money(received)+' • مانده: '+money(total-received);let p=db.products.find(x=>x.id===document.getElementById('saleProduct').value);document.getElementById('saleStockHint').textContent=p?'موجودی فعلی: '+fa(stockOf(p.id))+' '+p.unit+' • قیمت پیشنهادی: '+money(p.price):''}
+document.getElementById('saleProduct').addEventListener('change',()=>{let p=db.products.find(x=>x.id===document.getElementById('saleProduct').value);if(p)document.getElementById('salePrice').value=p.price;updateSalePreview()});
+['saleQty','salePrice','saleReceived','saleType'].forEach(id=>document.getElementById(id).addEventListener('input',updateSalePreview));
+document.getElementById('saleType').addEventListener('change',()=>{let v=document.getElementById('saleType').value;document.getElementById('saleReceived').value=v==='cash'?(+document.getElementById('saleQty').value||0)*(+document.getElementById('salePrice').value||0):0;updateSalePreview()});
+document.getElementById('saleForm').addEventListener('submit',e=>{e.preventDefault();let pid=document.getElementById('saleProduct').value,p=db.products.find(x=>x.id===pid),qty=+document.getElementById('saleQty').value,price=+document.getElementById('salePrice').value,total=qty*price,received=+document.getElementById('saleReceived').value,cid=document.getElementById('saleCustomer').value,type=document.getElementById('saleType').value;const saleDate=dateVal(document.getElementById('saleDate').value);if(!saleDate){alert('تاریخ فروش معتبر نیست؛ تاریخ شمسی را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید.');return}if(!p){alert('ابتدا کالا را انتخاب کنید.');return}if(qty<=0||price<0||received<0||received>total){alert('تعداد، قیمت یا مبلغ دریافتی معتبر نیست. دریافتی نباید از مبلغ فاکتور بیشتر باشد.');return}if(qty>stockOf(pid)){alert('موجودی کافی نیست. موجودی فعلی: '+fa(stockOf(pid)));return}if(total>received&&!cid){alert('برای فروش نسیه یا دارای مانده، مشتری را انتخاب کنید.');return}if(type==='cash'&&received!==total&&!cid){alert('برای ثبت فروش با پرداخت ناقص، مشتری را انتخاب کنید.');return}let inv='F-'+String(db.seq.sale++).padStart(5,'0');db.sales.push({id:id(),invoice:inv,productId:pid,productName:p.name,qty,price,cost:+p.cost,total,received,type,receivedMethod:document.getElementById('saleReceivedMethod').value,customerId:cid||null,date:saleDate,note:document.getElementById('saleNote').value.trim()});document.getElementById('saleForm').reset();document.getElementById('saleDate').value=gregorianToJalali(today());document.getElementById('saleQty').value=1;document.getElementById('saleReceived').value=0;renderSelects();save();updateSalePreview();alert('فاکتور '+inv+' ثبت شد. مانده فاکتور: '+money(total-received))});
+function renderSales(){let q=(document.getElementById('saleSearch').value||'').toLowerCase();let list=[...db.sales].reverse().filter(s=>(s.invoice+' '+customerName(s.customerId)+' '+(s.productName||productName(s.productId))).toLowerCase().includes(q));document.getElementById('salesTable').innerHTML=table(['فاکتور','تاریخ','کالا','تعداد','جمع','دریافتی','مانده','مشتری'],list.map(s=>row([esc(s.invoice),esc(s.date),esc(s.productName||productName(s.productId)),fa(s.qty),money(s.total),money(s.received),money(s.total-s.received),esc(s.customerId?customerName(s.customerId):'نقدی')])));document.getElementById('recentSales').innerHTML=table(['فاکتور','تاریخ','جمع','مانده'],[...db.sales].reverse().slice(0,5).map(s=>row([esc(s.invoice),esc(s.date),money(s.total),money(s.total-s.received)])))}
+function supplierName(sid){return (db.suppliers||[]).find(x=>x.id===sid)?.name||'—'}
+function supplierBalance(sid){let s=(db.suppliers||[]).find(x=>x.id===sid);if(!s)return 0;return Number(s.opening||0)+sum(db.purchases.filter(x=>x.supplierId===sid&&!x.paid),x=>x.total)}
+function resetSupplierForm(){document.getElementById('supplierForm').reset();document.getElementById('supplierId').value='';document.getElementById('supplierOpening').value=0;document.getElementById('supplierFormTitle').textContent='افزودن تأمین‌کننده'}
+function editSupplier(sid){let x=db.suppliers.find(a=>a.id===sid);if(!x)return;document.getElementById('supplierId').value=x.id;document.getElementById('supplierName').value=x.name;document.getElementById('supplierPhone').value=x.phone||'';document.getElementById('supplierOpening').value=x.opening||0;document.getElementById('supplierNote').value=x.note||'';document.getElementById('supplierFormTitle').textContent='ویرایش تأمین‌کننده';window.scrollTo(0,0)}
+function deleteSupplier(sid){if(db.purchases.some(x=>x.supplierId===sid)){alert('این تأمین‌کننده سابقه خرید دارد؛ برای حفظ سوابق امکان حذف او نیست.');return}if(confirm('تأمین‌کننده حذف شود؟')){db.suppliers=db.suppliers.filter(x=>x.id!==sid);save()}}
+document.getElementById('supplierForm').addEventListener('submit',e=>{e.preventDefault();let sid=document.getElementById('supplierId').value,old=db.suppliers.find(x=>x.id===sid),x={id:sid||id(),name:document.getElementById('supplierName').value.trim(),phone:document.getElementById('supplierPhone').value.trim(),opening:old?Number(old.opening||0):Number(document.getElementById('supplierOpening').value||0),note:document.getElementById('supplierNote').value.trim()};if(old)db.suppliers=db.suppliers.map(a=>a.id===sid?x:a);else db.suppliers.push(x);resetSupplierForm();save();alert('تأمین‌کننده ذخیره شد.')});
+function renderSuppliers(){db.suppliers=db.suppliers||[];document.getElementById('suppliersTable').innerHTML=table(['نام تأمین‌کننده','تماس','مانده بدهی','توضیحات','عملیات'],db.suppliers.map(x=>row([esc(x.name),esc(x.phone||'—'),'<b>'+money(supplierBalance(x.id))+'</b>',esc(x.note||'—'),'<button class="btn secondary small" onclick="editSupplier(\''+x.id+'\')">ویرایش</button> <button class="btn danger small" onclick="deleteSupplier(\''+x.id+'\')">حذف</button>'])))}
+document.getElementById('purchaseForm').addEventListener('submit',e=>{e.preventDefault();let pid=document.getElementById('buyProduct').value,p=db.products.find(x=>x.id===pid),qty=+document.getElementById('buyQty').value,cost=+document.getElementById('buyCost').value;const purchaseDate=dateVal(document.getElementById('buyDate').value);if(!purchaseDate){alert('تاریخ خرید معتبر نیست؛ تاریخ شمسی را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید.');return}if(!p||qty<=0||cost<0){alert('اطلاعات خرید معتبر نیست.');return}let oldStock=stockOf(pid),newStock=oldStock+qty;p.cost=newStock>0?((oldStock*p.cost)+(qty*cost))/newStock:cost;let supplierId=document.getElementById('buySupplier').value||'';db.purchases.push({id:id(),productId:pid,productName:p.name,supplierId,supplierName:supplierName(supplierId),qty,cost,total:qty*cost,date:purchaseDate,paid:document.getElementById('buyPaid').value==='yes',note:document.getElementById('buyNote').value.trim()});document.getElementById('purchaseForm').reset();document.getElementById('buyDate').value=gregorianToJalali(today());document.getElementById('buyQty').value=1;save();alert('خرید ثبت و موجودی افزایش یافت.')});
+function renderPurchases(){document.getElementById('purchasesTable').innerHTML=table(['تاریخ','کالا','تأمین‌کننده','تعداد','قیمت خرید','جمع','وضعیت پرداخت'],[...db.purchases].reverse().map(x=>row([esc(x.date),esc(x.productName||productName(x.productId)),esc(x.supplierName||supplierName(x.supplierId)),fa(x.qty),money(x.cost),money(x.total),x.paid?'<span class="tag">پرداخت شده</span>':'<span class="tag red">پرداخت نشده</span>'])))}
+document.getElementById('paymentForm').addEventListener('submit',e=>{e.preventDefault();let cid=document.getElementById('payCustomer').value,amount=+document.getElementById('payAmount').value;const paymentDate=dateVal(document.getElementById('payDate').value);if(!paymentDate){alert('تاریخ دریافت معتبر نیست؛ تاریخ شمسی را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید.');return}if(!cid||amount<=0){alert('مشتری و مبلغ معتبر را انتخاب کنید.');return}db.payments.push({id:id(),customerId:cid,amount,date:paymentDate,method:document.getElementById('payMethod').value,note:document.getElementById('payNote').value.trim()});document.getElementById('paymentForm').reset();document.getElementById('payDate').value=gregorianToJalali(today());save();alert('دریافت ثبت شد.')});
+function renderPayments(){document.getElementById('paymentsTable').innerHTML=table(['تاریخ','مشتری','مبلغ','روش','توضیحات'],[...db.payments].reverse().map(x=>row([esc(x.date),esc(customerName(x.customerId)),money(x.amount),esc(x.method||''),esc(x.note||'—')])))}
+function renderBankAccounts(){
+ const accounts=Array.isArray(db.bankAccounts)?db.bankAccounts:[];
+ const checkAccount=document.getElementById('checkAccount');if(checkAccount){const old=checkAccount.value;checkAccount.innerHTML='<option value="">بدون انتخاب</option>'+accounts.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.title)+' - '+esc(a.bank)+'</option>').join('');if(accounts.some(a=>a.id===old))checkAccount.value=old;}
+ document.getElementById('bankAccountsTable').innerHTML=table(['عنوان حساب','بانک','شماره حساب / شبا','کارت','موجودی اول دوره','توضیحات','عملیات'],accounts.map(a=>row([esc(a.title),esc(a.bank),esc(a.number||'—'),esc(a.cardLast4||'—'),money(a.opening||0),esc(a.note||'—'),'<button class="btn danger small" onclick="deleteBankAccount(\''+a.id+'\')">حذف</button>'])));
+}
+function deleteBankAccount(accountId){const a=(db.bankAccounts||[]).find(x=>x.id===accountId);if(!a)return;if(!confirm('حساب «'+a.title+'» حذف شود؟'))return;db.bankAccounts=db.bankAccounts.filter(x=>x.id!==accountId);save()}
+document.getElementById('bankAccountForm').addEventListener('submit',e=>{e.preventDefault();const title=document.getElementById('bankTitle').value.trim(),bank=document.getElementById('bankName').value.trim(),opening=Number(document.getElementById('bankOpening').value||0);if(!title||!bank||opening<0){alert('عنوان، نام بانک و موجودی اول دوره را بررسی کنید.');return}db.bankAccounts=db.bankAccounts||[];db.bankAccounts.push({id:id(),title,bank,number:document.getElementById('bankNumber').value.trim(),cardLast4:digitsLatin(document.getElementById('bankCard').value.trim()),opening,note:document.getElementById('bankNote').value.trim()});document.getElementById('bankAccountForm').reset();document.getElementById('bankOpening').value=0;save();alert('حساب بانکی ثبت شد.')});
+
+document.getElementById('expenseForm').addEventListener('submit',e=>{e.preventDefault();const expenseDate=dateVal(document.getElementById('eDate').value);if(!expenseDate){alert('تاریخ هزینه معتبر نیست؛ تاریخ شمسی را به شکل ۱۴۰۵/۰۷/۲۹ وارد کنید.');return}db.expenses.push({id:id(),title:document.getElementById('eTitle').value.trim(),amount:+document.getElementById('eAmount').value,category:document.getElementById('eCategory').value,method:document.getElementById('eMethod').value,date:expenseDate,note:document.getElementById('eNote').value.trim()});document.getElementById('expenseForm').reset();document.getElementById('eDate').value=gregorianToJalali(today());save();alert('هزینه ثبت شد.')});
+const CHECK_STATUS={pending:'در انتظار وصول / پرداخت',deposited:'واگذار شده به بانک',cleared:'وصول / پرداخت شد',returned:'برگشت خورده',cancelled:'باطل شده'};
+function renderChecks(){
+ const q=(document.getElementById('checkSearch')?.value||'').toLowerCase();const ft=document.getElementById('checkFilterType')?.value||'all';const fs=document.getElementById('checkFilterStatus')?.value||'all';
+ const list=[...(db.checks||[])].filter(c=>(ft==='all'||c.type===ft)&&(fs==='all'||c.status===fs)&&[c.number,c.person,c.bank,c.note].join(' ').toLowerCase().includes(q)).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
+ const incoming=(db.checks||[]).filter(c=>c.type==='incoming'&&c.status!=='cancelled');const outgoing=(db.checks||[]).filter(c=>c.type==='outgoing'&&c.status!=='cancelled');
+ document.getElementById('checksSummary').innerHTML='<div class="stat"><span>چک‌های دریافتی</span><strong>'+money(sum(incoming,c=>c.amount))+'</strong></div><div class="stat"><span>چک‌های پرداختی</span><strong>'+money(sum(outgoing,c=>c.amount))+'</strong></div><div class="stat"><span>چک‌های در انتظار</span><strong>'+money(sum((db.checks||[]).filter(c=>c.status==='pending'||c.status==='deposited'),c=>c.amount))+'</strong></div>';
+ document.getElementById('checksTable').innerHTML=table(['نوع','شماره چک','شخص','بانک','مبلغ','تاریخ ثبت','سررسید','حساب مرتبط','وضعیت','توضیحات','عملیات'],list.map(c=>row([c.type==='incoming'?'دریافتی':'پرداختی',esc(c.number),esc(c.person),esc(c.bank),money(c.amount),esc(c.date?gregorianToJalali(c.date):''),esc(c.dueDate?gregorianToJalali(c.dueDate):''),esc((db.bankAccounts||[]).find(a=>a.id===c.accountId)?.title||'—'),esc(CHECK_STATUS[c.status]||c.status),esc(c.note||'—'),'<button class="btn secondary small" onclick="changeCheckStatus(&quot;'+c.id+'&quot;)">تغییر وضعیت</button> <button class="btn danger small" onclick="deleteCheck(&quot;'+c.id+'&quot;)">حذف</button>'])));
+}
+function changeCheckStatus(checkId){const c=(db.checks||[]).find(x=>x.id===checkId);if(!c)return;const options=Object.entries(CHECK_STATUS).map(([k,v])=>k+' = '+v).join('\n');const value=prompt('وضعیت جدید را وارد کنید:\n'+options,c.status);if(value===null)return;const key=value.trim();if(!CHECK_STATUS[key]){alert('یکی از کدهای وضعیت را وارد کنید: pending, deposited, cleared, returned, cancelled');return}c.status=key;save()}
+function deleteCheck(checkId){if(!confirm('این چک حذف شود؟'))return;db.checks=(db.checks||[]).filter(c=>c.id!==checkId);save()}
+document.getElementById('checkForm').addEventListener('submit',e=>{e.preventDefault();const date=jalaliToGregorian(document.getElementById('checkDate').value),dueDate=jalaliToGregorian(document.getElementById('checkDueDate').value),amount=Number(document.getElementById('checkAmount').value);if(!date||!dueDate){alert('تاریخ ثبت و سررسید را با تقویم شمسی معتبر انتخاب کنید.');return}if(amount<=0){alert('مبلغ چک باید بیشتر از صفر باشد.');return}db.checks=db.checks||[];db.checks.push({id:id(),type:document.getElementById('checkType').value,number:document.getElementById('checkNumber').value.trim(),amount,person:document.getElementById('checkPerson').value.trim(),bank:document.getElementById('checkBank').value.trim(),accountId:document.getElementById('checkAccount').value,date,dueDate,status:document.getElementById('checkStatus').value,note:document.getElementById('checkNote').value.trim()});document.getElementById('checkForm').reset();save();alert('چک ثبت شد.');});
+function cashboxBalance(){
+ const opening=Number(db.cashOpening||0);
+ const cashSales=sum(db.sales.filter(x=>(x.receivedMethod||((x.type==='cash'||(!x.type&&Number(x.received||0)>0&&Number(x.received||0)===Number(x.total||0)))?'نقدی':''))==='نقدی'),x=>Number(x.received||0));
+ const cashCustomerReceipts=sum(db.payments.filter(x=>(x.method||'نقدی')==='نقدی'),x=>Number(x.amount||0));
+ const cashExpenses=sum(db.expenses.filter(x=>(x.method||'نقدی')==='نقدی'),x=>Number(x.amount||0));
+ return opening+cashSales+cashCustomerReceipts-cashExpenses;
+}
+function renderCashbox(){
+ const opening=Number(db.cashOpening||0);
+ const cashSales=db.sales.filter(x=>(x.receivedMethod||((x.type==='cash'||(!x.type&&Number(x.received||0)>0&&Number(x.received||0)===Number(x.total||0)))?'نقدی':''))==='نقدی');
+ const cashCustomerReceipts=db.payments.filter(x=>(x.method||'نقدی')==='نقدی');
+ const cashExpenses=db.expenses.filter(x=>(x.method||'نقدی')==='نقدی');
+ document.getElementById('cashOpening').value=opening;
+ document.getElementById('cashSummary').innerHTML=[['موجودی اول دوره',money(opening)],['دریافت نقدی فروش',money(sum(cashSales,x=>x.received||0))],['دریافت نقدی از مشتریان',money(sum(cashCustomerReceipts,x=>x.amount||0))],['هزینه‌های پرداخت‌شده نقدی',money(sum(cashExpenses,x=>x.amount||0))],['موجودی فعلی صندوق',money(cashboxBalance())]].map(x=>'<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
+ let movements=[];cashSales.forEach(x=>movements.push({date:x.date,label:'دریافت فروش '+(x.invoice||''),amount:Number(x.received||0),kind:'in'}));cashCustomerReceipts.forEach(x=>movements.push({date:x.date,label:'دریافت از '+customerName(x.customerId),amount:Number(x.amount||0),kind:'in'}));cashExpenses.forEach(x=>movements.push({date:x.date,label:'هزینه: '+(x.title||''),amount:Number(x.amount||0),kind:'out'}));
+ movements.sort((a,b)=>a.date.localeCompare(b.date));let balance=opening;let rows=movements.map(x=>{balance+=x.kind==='in'?x.amount:-x.amount;return row([esc(x.date?gregorianToJalali(x.date):'—'),esc(x.label),x.kind==='in'?money(x.amount):'—',x.kind==='out'?money(x.amount):'—',money(balance)])});
+ document.getElementById('cashMovements').innerHTML=table(['تاریخ','شرح','ورودی','خروجی','مانده پس از گردش'],rows);
+}
+document.getElementById('cashOpeningForm').addEventListener('submit',e=>{e.preventDefault();const value=Number(document.getElementById('cashOpening').value);if(!Number.isFinite(value)||value<0){alert('موجودی اول دوره معتبر نیست.');return}db.cashOpening=value;save();alert('موجودی اول دوره صندوق ذخیره شد.')});
+function renderExpenses(){document.getElementById('expensesTable').innerHTML=table(['تاریخ','عنوان','دسته','مبلغ','روش پرداخت','توضیحات'],[...db.expenses].reverse().map(x=>row([esc(x.date),esc(x.title),esc(x.category),money(x.amount),esc(x.method||'نقدی'),esc(x.note||'—')])))}
+function setReportMonth(){let d=new Date(),first=new Date(d.getFullYear(),d.getMonth(),1);document.getElementById('reportFrom').value=gregorianToJalali(first.getFullYear()+'-'+String(first.getMonth()+1).padStart(2,'0')+'-'+String(first.getDate()).padStart(2,'0'));document.getElementById('reportTo').value=gregorianToJalali(today());renderReports()}
+function renderReports(){let from=jalaliToGregorian(document.getElementById('reportFrom').value)||'0000-01-01',to=jalaliToGregorian(document.getElementById('reportTo').value)||'9999-12-31';let sales=db.sales.filter(x=>x.date>=from&&x.date<=to),purchases=db.purchases.filter(x=>x.date>=from&&x.date<=to),payments=db.payments.filter(x=>x.date>=from&&x.date<=to),expenses=db.expenses.filter(x=>x.date>=from&&x.date<=to);let rev=sum(sales,x=>x.total),cogs=sum(sales,x=>x.qty*x.cost),exp=sum(expenses,x=>x.amount),receipts=sum(sales,x=>x.received)+sum(payments,x=>x.amount),profit=rev-cogs-exp;
+document.getElementById('reportStats').innerHTML=[['فروش',money(rev)],['دریافت نقدی و بانکی',money(receipts)],['خرید ثبت‌شده',money(sum(purchases,x=>x.total))],['هزینه‌ها',money(exp)],['سود ناخالص',money(rev-cogs)],['سود عملیاتی تقریبی',money(profit)],['مانده کل مشتریان',money(sum(db.customers,c=>Math.max(0,customerBalance(c.id))))],['بدهی منفی/اعتبار مشتری',money(sum(db.customers,c=>Math.max(0,-customerBalance(c.id))))]].map(x=>'<div class="stat"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
+document.getElementById('stockReport').innerHTML=table(['کد','کالا','ورود کالا در بازه','خروج کالا در بازه','خالص گردش','موجودی فعلی','ارزش موجودی'],db.products.map(p=>{let incoming=sum(purchases.filter(x=>x.productId===p.id),x=>x.qty),outgoing=sum(sales.filter(x=>x.productId===p.id),x=>x.qty);return row([esc(p.code),esc(p.name),fa(incoming)+' '+esc(p.unit),fa(outgoing)+' '+esc(p.unit),fa(incoming-outgoing)+' '+esc(p.unit),fa(stockOf(p.id))+' '+esc(p.unit),money(stockOf(p.id)*p.cost)])}));
+document.getElementById('profitReport').innerHTML='<p>فروش: <b>'+money(rev)+'</b></p><p>بهای تمام‌شده کالای فروخته‌شده: <b>'+money(cogs)+'</b></p><p>سود ناخالص: <b>'+money(rev-cogs)+'</b></p><p>هزینه‌های ثبت‌شده: <b>'+money(exp)+'</b></p><p>سود عملیاتی تقریبی: <b class="'+(profit<0?'dangerText':'success')+'">'+money(profit)+'</b></p>';
+}
+function renderHome(){let d=today(),s=db.sales.filter(x=>x.date===d),p=db.payments.filter(x=>x.date===d),e=db.expenses.filter(x=>x.date===d),todayChecks=(db.checks||[]).filter(x=>x.dueDate===d&&x.status!=='cancelled');document.getElementById('dashSales').textContent=money(sum(s,x=>x.total));document.getElementById('dashReceipts').textContent=money(sum(s,x=>x.received)+sum(p,x=>x.amount));document.getElementById('dashExpenses').textContent=money(sum(e,x=>x.amount));document.getElementById('dashStock').textContent=money(sum(db.products,x=>stockOf(x.id)*x.cost));document.getElementById('dashDebt').textContent=money(sum(db.customers,x=>Math.max(0,customerBalance(x.id))));document.getElementById('dashProducts').textContent=fa(db.products.length);document.getElementById('dashProfit').textContent=money(sum(s,x=>x.total-x.qty*x.cost));document.getElementById('dashLow').textContent=fa(db.products.filter(x=>stockOf(x.id)<=Number(x.min||0)).length);document.getElementById('dashCashbox').textContent=money(cashboxBalance());document.getElementById('dashChecksToday').textContent=fa(todayChecks.length)+' مورد';document.getElementById('dashChecksDetail').textContent='مجموع: '+money(sum(todayChecks,x=>Number(x.amount||0)))+' | دریافتی: '+money(sum(todayChecks.filter(x=>x.type==='incoming'),x=>Number(x.amount||0)))+' | پرداختی: '+money(sum(todayChecks.filter(x=>x.type==='outgoing'),x=>Number(x.amount||0)))}
+function renderBackup(){document.getElementById('dataInfo').innerHTML='<p>تعداد کالاها: <b>'+fa(db.products.length)+'</b></p><p>تعداد مشتریان: <b>'+fa(db.customers.length)+'</b></p><p>تعداد تأمین‌کنندگان: <b>'+fa((db.suppliers||[]).length)+'</b></p><p>فاکتورهای فروش: <b>'+fa(db.sales.length)+'</b></p><p>سوابق خرید: <b>'+fa(db.purchases.length)+'</b></p><p>دریافت‌ها: <b>'+fa(db.payments.length)+'</b></p><p>هزینه‌ها: <b>'+fa(db.expenses.length)+'</b></p>'}
+function renderAll(){renderProducts();renderCustomers();renderSuppliers();renderSales();renderPurchases();renderPayments();renderCashbox();renderBankAccounts();renderChecks();renderExpenses();renderHome();renderBackup();renderSelects();updateSalePreview();if(document.getElementById('reports').classList.contains('active'))renderReports()}
+function exportBackup(){let blob=new Blob([JSON.stringify({app:'Hesabyar Retail',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='hesabyar-backup-'+today()+'.json';a.click();URL.revokeObjectURL(url)}
+document.getElementById('importFile').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let obj=JSON.parse(await f.text()),candidate=obj.data||obj;if(!Array.isArray(candidate.products)||!Array.isArray(candidate.customers)||!Array.isArray(candidate.sales))throw Error('ساختار فایل معتبر نیست');if(!confirm('اطلاعات فعلی با فایل پشتیبان جایگزین شود؟'))return;db=Object.assign(fresh(),candidate);save();alert('بازیابی انجام شد.')}catch(err){alert('فایل قابل بازیابی نیست یا معتبر نیست.')}e.target.value=''});
+function clearAllData(){if(!confirm('مطمئن هستید؟ همه کالاها، مشتریان و سوابق مالی حذف می‌شوند.'))return;if(!confirm('تأیید نهایی: این عملیات برگشت‌پذیر نیست.'))return;db=fresh();save();alert('اطلاعات برنامه حذف شد.')}
+
+// تقویم شمسی داخلی، بدون نیاز به اینترنت
+const JMONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const JWDAYS=['ش','ی','د','س','چ','پ','ج'];
+let activeJCal=null, jcalYear=1405, jcalMonth=1;
+function currentJalaliParts(inputId){
+ const val=document.getElementById(inputId)?.value;
+ const iso=val?jalaliToGregorian(val):'';
+ const parts=(iso?gregorianToJalali(iso):gregorianToJalali(today())).split('/').map(Number);
+ return parts.length===3&&parts.every(Number.isFinite)?parts:[1405,1,1];
+}
+function jalaliMonthLength(y,m){if(m<=6)return 31;if(m<=11)return 30;return jalaliToGregorian(y+'/12/30')?30:29}
+function jalaliWeekday(y,m,d){
+ const iso=jalaliToGregorian(y+'/'+String(m).padStart(2,'0')+'/'+String(d).padStart(2,'0'));
+ if(!iso)return 0;
+ const [gy,gm,gd]=iso.split('-').map(Number);
+ return (new Date(Date.UTC(gy,gm-1,gd)).getUTCDay()+1)%7;
+}
+function openJalaliCalendar(inputId){
+ activeJCal=inputId;
+ const p=currentJalaliParts(inputId);jcalYear=p[0];jcalMonth=p[1];
+ document.querySelectorAll('.jcal-pop').forEach(el=>el.classList.remove('open'));
+ renderJalaliCalendar();
+ const pop=document.getElementById('cal-'+inputId);if(pop)pop.classList.add('open');
+}
+function shiftJalaliMonth(delta){
+ jcalMonth+=delta;
+ if(jcalMonth<1){jcalMonth=12;jcalYear--}
+ if(jcalMonth>12){jcalMonth=1;jcalYear++}
+ renderJalaliCalendar();
+}
+function renderJalaliCalendar(){
+ if(!activeJCal)return;
+ const pop=document.getElementById('cal-'+activeJCal);if(!pop)return;
+ const selected=document.getElementById(activeJCal).value;
+ const todayParts=gregorianToJalali(today()).split('/').map(Number);
+ const selectedParts=selected?selected.split('/').map(Number):[];
+ let days=JWDAYS.map(x=>'<div class="weekday">'+x+'</div>').join('');
+ const offset=jalaliWeekday(jcalYear,jcalMonth,1),count=jalaliMonthLength(jcalYear,jcalMonth);
+ for(let i=0;i<offset;i++)days+='<span></span>';
+ for(let d=1;d<=count;d++){
+  const date=jcalYear+'/'+String(jcalMonth).padStart(2,'0')+'/'+String(d).padStart(2,'0');
+  const cls=(todayParts[0]===jcalYear&&todayParts[1]===jcalMonth&&todayParts[2]===d?' today':'')+
+   (selectedParts[0]===jcalYear&&selectedParts[1]===jcalMonth&&selectedParts[2]===d?' selected':'');
+  days+='<button type="button" class="'+cls.trim()+'" onclick="chooseJalaliDate('+jcalYear+','+jcalMonth+','+d+')">'+fa(d)+'</button>';
+ }
+ pop.innerHTML='<div class="jcal-head"><button type="button" onclick="shiftJalaliMonth(-1)">ماه قبل</button><strong>'+JMONTHS[jcalMonth-1]+' '+fa(jcalYear)+'</strong><button type="button" onclick="shiftJalaliMonth(1)">ماه بعد</button></div>'+
+ '<div class="jcal-grid">'+days+'</div><div class="jcal-actions"><button type="button" onclick="chooseJalaliToday()">امروز</button><button type="button" onclick="closeJalaliCalendar()">بستن</button></div>';
+}
+function chooseJalaliDate(y,m,d){
+ if(!activeJCal)return;
+ const val=y+'/'+String(m).padStart(2,'0')+'/'+String(d).padStart(2,'0');
+ const iso=jalaliToGregorian(val);
+ if(!iso){alert('این تاریخ معتبر نیست.');return}
+ const input=document.getElementById(activeJCal);input.value=val;
+ input.dispatchEvent(new Event('change',{bubbles:true}));
+ const wasReport=(activeJCal==='reportFrom'||activeJCal==='reportTo');
+ closeJalaliCalendar();
+ if(wasReport)renderReports();
+}
+function chooseJalaliToday(){
+ const p=gregorianToJalali(today()).split('/').map(Number);chooseJalaliDate(p[0],p[1],p[2]);
+}
+function closeJalaliCalendar(){
+ if(activeJCal){const pop=document.getElementById('cal-'+activeJCal);if(pop)pop.classList.remove('open')}
+ activeJCal=null;
+}
+document.addEventListener('click',e=>{
+ if(!e.target.closest('.jcal'))closeJalaliCalendar();
+});
+
+['saleDate','buyDate','payDate','eDate'].forEach(id=>document.getElementById(id).value=gregorianToJalali(today()));
+setReportMonth();renderAll();
+</script>
+</body>
+</html>
