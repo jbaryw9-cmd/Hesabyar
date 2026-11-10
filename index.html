@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#14532d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="./manifest.json">
 <title>حساب‌یار | حسابداری خرده‌فروشی (نسخه اصلاح‌شده)</title>
 <style>
 :root{--green:#14532d;--green2:#166534;--bg:#f3f6f4;--card:#fff;--text:#17211b;--muted:#66736a;--line:#dce5de;--red:#b91c1c;--amber:#a16207;--blue:#1d4ed8}
@@ -51,7 +55,7 @@ table{width:100%;border-collapse:collapse;min-width:540px;font-size:12px}th,td{p
 </style>
 </head>
 <body>
-<header><h1>حساب‌یار</h1><p>حسابداری و مدیریت خرده‌فروشی • آفلاین • ریال</p></header>
+<header><h1>حساب‌یار</h1><p>حسابداری و مدیریت خرده‌فروشی • آفلاین • ریال</p><p id="offlineStatus" style="font-size:11px;margin-top:5px;opacity:.95">در حال بررسی وضعیت ذخیره‌سازی…</p></header>
 <nav id="nav">
 <button data-page="home" class="active">داشبورد</button><button data-page="products">کالاها</button><button data-page="customers">مشتریان</button><button data-page="suppliers">تأمین‌کنندگان</button><button data-page="purchases">خرید کالا</button><button data-page="sales">فروش</button><button data-page="payments">دریافت‌ها</button><button data-page="cashbox">صندوق</button><button data-page="bankAccounts">حساب‌های بانکی</button><button data-page="checks">مدیریت چک‌ها</button><button data-page="expenses">هزینه‌ها</button><button data-page="reports">گزارش‌ها</button><button data-page="backup">پشتیبان</button>
 </nav>
@@ -438,5 +442,37 @@ document.addEventListener('click',e=>{
 ['saleDate','buyDate','payDate','eDate'].forEach(id=>document.getElementById(id).value=gregorianToJalali(today()));
 setReportMonth();renderAll();
 </script>
+
+<script>
+/* نصب پوسته آفلاین و درخواست نگهداری پایدار داده‌ها */
+(async function(){
+  const status=document.getElementById('offlineStatus');
+  const setStatus=(message)=>{if(status)status.textContent=message;};
+  let persistence='ذخیره محلی مرورگر فعال است';
+  try{
+    if(navigator.storage && navigator.storage.persist){
+      const persisted=await navigator.storage.persist();
+      persistence=persisted
+        ? 'ذخیره‌سازی پایدار دستگاه تأیید شد'
+        : 'ذخیره محلی فعال است؛ پشتیبان‌گیری منظم را فراموش نکنید';
+    }
+  }catch(e){}
+  if('serviceWorker' in navigator){
+    try{
+      const registration=await navigator.serviceWorker.register('./sw.js');
+      await navigator.serviceWorker.ready;
+      setStatus((navigator.onLine?'آنلاین':'آفلاین')+' • '+persistence+' • اجرای آفلاین آماده است');
+    }catch(error){
+      setStatus('ذخیره محلی فعال است؛ آماده‌سازی اجرای آفلاین کامل نشد');
+      console.error('Service Worker registration failed:',error);
+    }
+  }else{
+    setStatus('ذخیره محلی فعال است؛ این مرورگر از اجرای آفلاین برنامه پشتیبانی کامل نمی‌کند');
+  }
+  window.addEventListener('online',()=>setStatus('آنلاین • '+persistence));
+  window.addEventListener('offline',()=>setStatus('آفلاین • '+persistence));
+})();
+</script>
+
 </body>
 </html>
